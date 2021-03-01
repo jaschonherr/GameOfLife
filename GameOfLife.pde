@@ -6,10 +6,16 @@ public final static int NUM_ROWS = 40;
 public final static int NUM_COLS = 60;
 private Life[][] buttons; //2d array of Life buttons each representing one cell
 private boolean[][] buffer; //2d array of booleans to store state of buttons array
-private boolean running = true; //used to start and stop program
+private boolean running = true; //used to start and stop program 
+private SimpleButton fpsAdd;
+private SimpleButton fpsSub;
+private SimpleButton pause;
+private SimpleButton wipe;
+private SimpleButton randomize;
 
 public void setup () {
-  size(1200, 850);
+  //noStroke();
+  size(1200, 920);
   frameRate(rate);
   // make the manager
   Interactive.make( this );
@@ -23,11 +29,22 @@ public void setup () {
   }
   //your code to initialize buffer goes here
   buffer = new boolean[NUM_ROWS][NUM_COLS];
+  fpsAdd = new SimpleButton(150, 820, 40, 40, "+");
+  fpsSub = new SimpleButton(90, 820, 40, 40, "-");
+  pause = new SimpleButton(1100, 820, 40, 40, "pause");
+  wipe = new SimpleButton(950, 820, 40, 40, "wipe");
+  randomize = new SimpleButton(800, 820, 40, 40, "random");
 }
 
 public void draw () {
   frameRate(rate);
-  background( 0 );
+  int tempRate = rate;
+  if(running == false) {
+    frameRate(30);
+  } else {
+    frameRate(tempRate);
+  }
+  background(150);
   if (running == false) //pause the program
     return;
   copyFromButtonsToBuffer();
@@ -42,29 +59,11 @@ public void draw () {
       } else {
         buffer[r][c] = false;
       }
+      stroke(0);
       buttons[r][c].draw();
     }
   }
-  copyFromBufferToButtons();
-  fill(255);
-  textSize(24);
-  text(rate + " frames per second", 10, 840);
-}
-
-public void keyPressed() {
-  if(key == 'p') {
-    running = !running;
-  }
-  if(key == 'd') {
-    if(rate < 30) {
-      rate += 4;
-    }
-  }
-  if(key == 'a') {
-    if(rate > 2) {
-      rate -= 4;
-    }
-  }
+  copyFromBufferToButtons();  
 }
 
 public void copyFromBufferToButtons() {
@@ -92,7 +91,7 @@ public boolean isValid(int r, int c) {
 }
 
 public int countNeighbors(int row, int col) {
-  private int count = 0;
+  int count = 0;
   if(isValid(row-1, col) && buttons[row-1][col].getLife()) {
     count++;
   }
@@ -132,7 +131,7 @@ public class Life {
     x = myCol*width;
     y = myRow*height;
     alive = Math.random() < .5; // 50/50 chance cell will be alive
-    Interactive.add( this ); // register it with the manager
+    Interactive.add(this); // register it with the manager
   }
 
   // called by manager
@@ -141,9 +140,9 @@ public class Life {
   }
   public void draw () {    
     if (alive != true)
-      fill(0);
+      fill(48, 30, 3);
     else 
-      fill(255);
+      fill(150);
       rect(x, y, width, height);
   }
   public boolean getLife() {
@@ -154,3 +153,98 @@ public class Life {
     alive = living;
   }
 }
+public class SimpleButton {
+
+  private float x, y, width, height;
+  private String myID;
+  //private int clicks;
+  SimpleButton (float xx, float yy, float w, float h, String i) {
+    x = xx; 
+    y = yy; 
+    width = w; 
+    height = h;
+    myID = i;
+    Interactive.add(this); // register it with the manager
+  }
+  
+  void mousePressed () {
+    if(myID.equals("+")) {
+        if(rate < 30 && running) {
+        rate += 4;
+      }
+    }
+    if(myID.equals("-")) {
+        if(rate > 2 && running) {
+        rate -= 4;
+      }
+    }
+    if(myID.equals("pause")) {
+      running = !running;
+    }
+    if(myID.equals("wipe")) {
+      for(int r = 0; r < NUM_ROWS; r++) {
+        for(int c = 0; c < NUM_COLS; c++) {
+          buttons[r][c].setLife(false);
+        }
+      }
+    }
+    if(myID.equals("random")) {
+      for(int r = 0; r < NUM_ROWS; r++) {
+        for(int c = 0; c < NUM_COLS; c++) {
+          double a = (Math.random());
+          if(a < 0.5) {
+            buttons[r][c].setLife(false);
+          } else {
+            buttons[r][c].setLife(true);
+          }
+        }
+      }
+    }
+  }
+
+  void draw () {
+    
+    fill(255);
+    rect(x, y, width, height);
+    textAlign(CENTER);
+    fill(0);
+    if(myID.equals("+")) {
+      textSize(40);
+      text("+", x + 21, y + 32);
+      textAlign(LEFT);
+      textSize(24);
+      text("Frames per second: " + rate, 20, 900);
+    }
+    if(myID.equals("-")) {
+      textSize(40);
+      text("-", x + 21, y + 32);
+    }
+    if(myID.equals("pause")) {
+      textSize(24);
+      textAlign(LEFT);
+      text("Pause/Play", 1060, 900);
+      if(running) {
+        rect(x + 10, y + 10, 5, 20);
+        rect(x + 25, y + 10, 5, 20);
+      } else {
+        triangle(x + width/5, y + width/5, x + width/5, y + width-(width/4), x + width-(width/4), y + width/2);
+      }
+    }
+    if(myID.equals("wipe")) {
+      textAlign(CENTER);
+      fill(255, 0, 0);
+      textSize(35);
+      text("X", x + 21, y + 33);
+      textSize(24);
+      fill(0);
+      textAlign(LEFT);
+      text("Wipe", 945, 900);
+    }
+    if(myID.equals("random")) {
+      ellipse(x + 20, y + 20, 30, 30);
+      textAlign(LEFT);
+      text("Reset", 790, 900);
+    }
+  }
+}
+
