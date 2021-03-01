@@ -92,7 +92,7 @@ public boolean isValid(int r, int c) {
 }
 
 public int countNeighbors(int row, int col) {
-  int count = 0;
+  private int count = 0;
   if(isValid(row-1, col) && buttons[row-1][col].getLife()) {
     count++;
   }
