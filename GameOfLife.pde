@@ -61,7 +61,7 @@ public void keyPressed() {
     }
   }
   if(key == 'a') {
-    if(rate > 6) {
+    if(rate > 2) {
       rate -= 4;
     }
   }
